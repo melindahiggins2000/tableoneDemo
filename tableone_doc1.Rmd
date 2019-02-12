@@ -1,0 +1,90 @@
+---
+title: "tableone demo"
+author: "Melinda Higgins"
+date: "February 12, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+here is some code and test output
+
+```{r}
+# tableone demo
+
+# Get data
+# learn more at https://archive.ics.uci.edu/ml/datasets/abalone
+
+# Load the abalone dataset using read_csv() function
+# from readr package
+library(readr)
+abalone <- readr::read_csv(file = "https://archive.ics.uci.edu/ml/machine-learning-databases/abalone/abalone.data",
+                           col_names = FALSE)
+
+# put in the variables names
+# see details at https://archive.ics.uci.edu/ml/machine-learning-databases/abalone/abalone.names
+names(abalone) <- c("sex","length",
+                    "diameter","height",
+                    "wholeWeight","shuckedWeight",
+                    "visceraWeight","shellWeight","rings")
+
+# learn more about tableone at
+# https://cran.r-project.org/web/packages/tableone/vignettes/introduction.html
+# load tableone package
+library(tableone)
+
+# simple summary stats
+tableone::CreateTableOne(data = abalone)
+
+# save the tableone output object
+tab1 <- tableone::CreateTableOne(data = abalone)
+
+# this is a special class object for "TableOne"
+class(tab1)
+
+# use the generic summary function
+# this calls summary.TableOne() function
+# to get nice missing stats and other summaries
+summary(tab1)
+
+# many of these variables are skewed and non-normal
+# see the nonparametric stats
+vars <- names(abalone)
+print(tab1, nonnormal = vars)
+
+# get stats by group
+tab2 <- CreateTableOne(strata = "sex" , 
+                       data = abalone)
+tab2
+
+# get nonparametric stat tests by group
+print(tab2, nonnormal = vars, smd = TRUE)
+
+out2 <- print(tab2, nonnormal = vars, smd = TRUE)
+class(out2)
+
+knitr::kable(out2)
+
+# try out with markdown
+# convert tableone objects
+# to work with knitr::kable
+
+# see http://rstudio-pubs-static.s3.amazonaws.com/405765_2ce448f9bde24148a5f94c535a34b70e.html
+
+kableone <- function(x, ...) {
+  capture.output(x <- print(x))
+  knitr::kable(x, ...)
+}
+kableone(CreateTableOne(vars = vars, 
+                        strata = "sex", 
+                        data = abalone), 
+         test = FALSE, 
+         varLabels = TRUE, 
+         dropEqual = TRUE, 
+         noSpaces = TRUE, 
+         printToggle = FALSE)
+
+```
+
